@@ -641,13 +641,13 @@ impl<'a, S: ContextProvider> SqlToRel<'a, S> {
             // Explicitly list all other types so that if sqlparser
             // adds/changes the `SQLDataType` the compiler will tell us on upgrade
             // and avoid bugs like https://github.com/apache/datafusion/issues/3059
+            SQLDataType::Datetime(None) => Ok(DataType::Timestamp(TimeUnit::Microsecond, None)),
             SQLDataType::Nvarchar(_)
             | SQLDataType::JSON
             | SQLDataType::Uuid
             | SQLDataType::Binary(_)
             | SQLDataType::Varbinary(_)
             | SQLDataType::Blob(_)
-            | SQLDataType::Datetime(_)
             | SQLDataType::Regclass
             | SQLDataType::Custom(_, _)
             | SQLDataType::Array(_)
@@ -664,6 +664,8 @@ impl<'a, S: ContextProvider> SqlToRel<'a, S> {
             | SQLDataType::Timestamp(_, _)
             // Precision is not supported
             | SQLDataType::Time(Some(_), _)
+            // precision is not supported
+            | SQLDataType::Datetime(Some(_))
             | SQLDataType::Dec(_)
             | SQLDataType::BigNumeric(_)
             | SQLDataType::BigDecimal(_)
