@@ -743,13 +743,15 @@ impl<'a, S: ContextProvider> SqlToRel<'a, S> {
                     .collect::<Result<Vec<_>>>()?;
                 Ok(DataType::Struct(Fields::from(fields)))
             }
+            SQLDataType::Datetime(None) => Ok(DataType::Timestamp(TimeUnit::Microsecond, None)),
             SQLDataType::Nvarchar(_)
             | SQLDataType::JSON
             | SQLDataType::Uuid
             | SQLDataType::Binary(_)
             | SQLDataType::Varbinary(_)
             | SQLDataType::Blob(_)
-            | SQLDataType::Datetime(_)
+            // precision is not supported
+            | SQLDataType::Datetime(Some(_))
             | SQLDataType::Regclass
             | SQLDataType::Custom(_, _)
             | SQLDataType::Array(_)
