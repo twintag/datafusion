@@ -570,12 +570,21 @@ impl Dialect for MySqlDialect {
         ast::DataType::Custom(ObjectName::from(vec![Ident::new("SIGNED")]), vec![])
     }
 
+    /// MySQL's `DATETIME` without a fractional-seconds precision is
+    /// `DATETIME(0)`: casting `'... 08:55:40.006'` to it rounds to whole
+    /// seconds, so a sub-second timestamp literal no longer compares equal to
+    /// the column it came from. Carry the unit's precision (MySQL caps it at 6).
     fn timestamp_cast_dtype(
         &self,
-        _time_unit: &TimeUnit,
+        time_unit: &TimeUnit,
         _tz: &Option<Arc<str>>,
     ) -> ast::DataType {
-        ast::DataType::Datetime(None)
+        let precision = match time_unit {
+            TimeUnit::Second => None,
+            TimeUnit::Millisecond => Some(3),
+            TimeUnit::Microsecond | TimeUnit::Nanosecond => Some(6),
+        };
+        ast::DataType::Datetime(precision)
     }
 
     fn requires_derived_table_alias(&self) -> bool {
