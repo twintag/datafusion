@@ -570,6 +570,11 @@ impl Dialect for MySqlDialect {
         ast::DataType::Custom(ObjectName::from(vec![Ident::new("SIGNED")]), vec![])
     }
 
+    /// MySQL's `CAST` does not accept `TINYINT` as a target type.
+    fn int8_cast_dtype(&self) -> ast::DataType {
+        ast::DataType::Custom(ObjectName::from(vec![Ident::new("SIGNED")]), vec![])
+    }
+
     /// MySQL's `DATETIME` without a fractional-seconds precision is
     /// `DATETIME(0)`: casting `'... 08:55:40.006'` to it rounds to whole
     /// seconds, so a sub-second timestamp literal no longer compares equal to

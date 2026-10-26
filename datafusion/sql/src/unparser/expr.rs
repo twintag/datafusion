@@ -3074,6 +3074,16 @@ mod tests {
         Ok(())
     }
 
+    // MySQL's `CAST` rejects `TINYINT` as a target type.
+    #[test]
+    fn mysql_int8_cast_uses_signed() -> Result<()> {
+        let unparser = Unparser::new(&MySqlDialect {});
+        let expr = Expr::Cast(Cast::new(Box::new(col("a")), Int8));
+        let ast = unparser.expr_to_sql(&expr)?;
+        assert_eq!(format!("{ast}"), "CAST(`a` AS SIGNED)");
+        Ok(())
+    }
+
     #[test]
     fn custom_dialect_date32_ast_dtype() -> Result<()> {
         let default_dialect = CustomDialectBuilder::default().build();
